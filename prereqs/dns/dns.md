@@ -337,5 +337,3 @@ DNS records are used to **map domain names** to IP addresses, mail servers, and 
 | Define **service locations (e.g., SIP, LDAP)** | SRV |
 
 ---
-
-🚀 **Now you have a complete DNS cheat sheet!** 🚀
