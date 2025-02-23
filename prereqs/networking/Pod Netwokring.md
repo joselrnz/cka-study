@@ -17,16 +17,39 @@ The Kubernetes networking model ensures that:
 3. **Nodes can communicate with all Pods** without NAT.
 4. **External communication is managed via Services or Ingress.**
 
-## 3. How Kubernetes Implements Pod Networking
-Kubernetes does not provide a built-in network solution but relies on **Container Network Interface (CNI) plugins** to implement networking. Common CNI plugins include:
+## 3. Container Network Interface (CNI)
+### **What is CNI?**
+CNI (Container Network Interface) is a framework for managing container networking in Kubernetes. It provides a standard API that network plugins use to configure networking when containers are created or removed.
 
-| **CNI Plugin** | **Description** |
-|--------------|----------------|
-| Flannel | Simple overlay network using VXLAN |
-| Calico | Uses BGP for routing and network policies |
-| Cilium | eBPF-based networking for high performance |
-| Weave | Uses a mesh network for connectivity |
-| Canal | Combines Calico and Flannel |
+### **How CNI Works?**
+1. **Pod Creation**: When a pod is scheduled, Kubernetes calls the CNI plugin to configure networking.
+2. **IP Allocation**: The CNI plugin assigns an IP address to the pod from the network range.
+3. **Routing Configuration**: The plugin sets up the necessary routes and bridges for communication.
+4. **Policy Enforcement**: Some CNI plugins provide network policies for security and traffic control.
+
+### **Common CNI Plugins**
+| **CNI Plugin** | **Description** | **Key Features** |
+|--------------|----------------|----------------|
+| Flannel | Simple overlay network using VXLAN | Easy to set up, Supports different backend modes |
+| Calico | Uses BGP for routing and network policies | Network policies, Highly scalable |
+| Cilium | eBPF-based networking for high performance | Advanced security, Low-latency networking |
+| Weave | Uses a mesh network for connectivity | Automatic encryption, No external dependencies |
+| Canal | Combines Calico and Flannel | Supports network policies, Simplifies networking |
+
+### **Example of CNI Configuration**
+```json
+{
+  "cniVersion": "0.3.1",
+  "name": "my-cni-network",
+  "type": "bridge",
+  "bridge": "cni0",
+  "ipam": {
+    "type": "host-local",
+    "subnet": "192.168.1.0/24"
+  }
+}
+```
+This configuration creates a bridge network (`cni0`) with IPs assigned from the `192.168.1.0/24` subnet.
 
 ## 4. Pod-to-Pod Communication
 Each pod in a cluster is assigned a unique IP that allows direct communication. Kubernetes ensures a **flat network model**, meaning **pods can communicate across nodes without NAT**.
