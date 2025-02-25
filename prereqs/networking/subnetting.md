@@ -1,122 +1,139 @@
+# Mastering Subnetting: A Detailed Guide
 
-### Network & Host Portions
-Each IPv4 address is conceptually split into two parts:
-1. **Network portion**: Identifies the specific network.
-2. **Host portion**: Identifies a specific host (device) within that network.
+## Table of Contents
+- [Mastering Subnetting: A Detailed Guide](#mastering-subnetting-a-detailed-guide)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Subnetting Refresher](#subnetting-refresher)
+    - [IP Address Basics](#ip-address-basics)
+    - [Network vs. Host Bits](#network-vs-host-bits)
+    - [CIDR Notation](#cidr-notation)
+  - [Four Pillars of Subnetting](#four-pillars-of-subnetting)
+    - [1. Identify the Requirements](#1-identify-the-requirements)
+    - [2. Decide How Many Bits to Borrow](#2-decide-how-many-bits-to-borrow)
+    - [3. Calculate Subnet Mask \& Block Size](#3-calculate-subnet-mask--block-size)
+    - [4. Determine Subnets and Ranges](#4-determine-subnets-and-ranges)
+  - [Tricks to Remember Subnetting Forever](#tricks-to-remember-subnetting-forever)
+    - [Mnemonic: "256 - Mask = Block Size"](#mnemonic-256---mask--block-size)
+    - [Binary Quick Reference](#binary-quick-reference)
+    - [Practice, Practice, Practice](#practice-practice-practice)
+  - [Conclusion](#conclusion)
+
+---
+
+## Introduction
+Subnetting can feel intimidating at first, but it’s really about **splitting a larger network** into **smaller, more manageable** subnetworks. Once you understand the logic, it becomes second nature.
+
+By the end of this guide, you'll have:
+- A **solid understanding** of how subnetting works
+- **Simple formulas** and **tricks** to remember key details
+- A **step-by-step method** you can apply to any IPv4 subnetting scenario
+
+---
+
+## Subnetting Refresher
+
+### IP Address Basics
+An IPv4 address is **32 bits** in total, typically shown as four 8-bit decimal numbers (octets), e.g.:
+```
+192.168.10.100
+```
+This can be represented in binary as:
+```
+192       .168      .10       .100
+11000000  .10101000 .00001010 .01100100
+```
+
+### Network vs. Host Bits
+- **Network bits** (N) identify which network the address belongs to.
+- **Host bits** (H) identify a particular device (host) on that network.
+
+**Subnetting** is about “borrowing” some bits from the **host** portion and using them as **network** bits, thus creating more (smaller) networks.
 
 ### CIDR Notation
-- **CIDR** (Classless Inter-Domain Routing) uses “slash” notation: `/x`.
-- The `/x` denotes how many bits (starting from the left) make up the **network portion**.
+- A `/x` means the first **x bits** of the IP address are **network bits**.
+- For instance, `/24` means **24 network bits** and **8 host bits**.
 
-A `/24` means:
-- The first 24 bits are the network portion.
-- The last 8 bits are for hosts.
-
-In dotted-decimal form, a `/24` mask is `255.255.255.0`.
-
-### Classful vs Classless
-- **Classful** addressing was the old system where a "Class C" network by definition had a `255.255.255.0` mask (`/24`).
-- **Classless** addressing (CIDR) is more flexible. You can use any subnet mask that suits your design (like `/25`, `/26`, etc.), regardless of traditional “class” boundaries.
-
----
-
-## Subnetting a /24 Network
-
-### Borrowing Bits
-When you “subnet” a `/24`, you **borrow bits** from the host portion to create more networks. Each bit you borrow doubles the number of subnets.
-
-- **Number of subnets** = \(2^{(\text{borrowed bits})}\)
-
-### Subnet Mask Changes
-Originally:  
-- A `/24` network mask = `255.255.255.0`.
-
-If you borrow 1 bit (making `/25`):
-- New subnet mask = `255.255.255.128`.
-
-Borrow 2 bits (making `/26`):
-- New subnet mask = `255.255.255.192`, and so on.
-
-### Number of Subnets and Hosts
-- **Subnets**: \(2^{\text{borrowed bits}}\)
-- **Hosts per subnet**: \(2^{\text{remaining host bits}} - 2\)
-
-  (The “-2” accounts for the **Network Address** and the **Broadcast Address**, neither of which can be assigned to a host.)
+| CIDR  | Network Bits | Host Bits |
+|-------|-------------:|----------:|
+| /24   | 24           | 8         |
+| /25   | 25           | 7         |
+| /26   | 26           | 6         |
+| /27   | 27           | 5         |
+| /28   | 28           | 4         |
+| /29   | 29           | 3         |
+| /30   | 30           | 2         |
+| /31   | 31           | 1         |
+| /32   | 32           | 0         |
 
 ---
 
-## Example: 192.168.1.0/24
+## Four Pillars of Subnetting
 
-Let’s say you have the network `192.168.1.0/24`. By default, that’s **one** network with:
-- Network portion: `192.168.1`
-- Host portion: last 8 bits
-- Usable host addresses: 254 (from `.1` to `.254`)
+### 1. Identify the Requirements
+Ask:
+- **How many subnets** do I need?
+- **How many hosts** per subnet do I need?
 
-### Subnetting to /26
-Suppose you want **4 subnets** in total. Borrow **2 bits** from the host portion:
+### 2. Decide How Many Bits to Borrow
+Use the formula:
+```
+Number of subnets = 2^(bits borrowed)
+```
+Also keep in mind the required **hosts**:
+```
+Usable hosts/subnet = 2^(host bits remaining) - 2
+```
+(The “-2” is for the network address and broadcast address.)
 
-- Original: `/24` → `255.255.255.0`
-- New: `/26` → `255.255.255.192`
-- Borrowed 2 bits → \(2^2 = 4\) subnets
-- Each subnet can have \(2^{6} - 2 = 64 - 2 = 62\) usable IP addresses.
+### 3. Calculate Subnet Mask & Block Size
+After deciding how many bits to borrow, you can find:
+- The **new subnet mask** in both `/x` form and dotted decimal.
+- The **block size** (increment) which tells you how subnets are spaced in the last octet (or relevant octet).
 
-### Subnet Ranges for /26
-Your 4 subnets are each 64 IP addresses long (`.0-.63`, `.64-.127`, `.128-.191`, `.192-.255`):
-
-1. **Subnet 1**:  
-   - Network Address: `192.168.1.0`  
-   - Usable Host Range: `192.168.1.1` – `192.168.1.62`  
-   - Broadcast Address: `192.168.1.63`
-
-2. **Subnet 2**:  
-   - Network Address: `192.168.1.64`  
-   - Usable Host Range: `192.168.1.65` – `192.168.1.126`  
-   - Broadcast Address: `192.168.1.127`
-
-3. **Subnet 3**:  
-   - Network Address: `192.168.1.128`  
-   - Usable Host Range: `192.168.1.129` – `192.168.1.190`  
-   - Broadcast Address: `192.168.1.191`
-
-4. **Subnet 4**:  
-   - Network Address: `192.168.1.192`  
-   - Usable Host Range: `192.168.1.193` – `192.168.1.254`  
-   - Broadcast Address: `192.168.1.255`
+### 4. Determine Subnets and Ranges
+Finally:
+- **List** the network addresses.
+- **List** the broadcast address for each subnet.
+- **Identify** the usable host range in each subnet.
 
 ---
 
-## Subnetting Table for /24
+## Tricks to Remember Subnetting Forever
 
-| Borrowed Bits | New CIDR | Subnet Mask          | Number of Subnets    | Total IPs per Subnet | Usable IPs (Hosts) |
-|:-------------:|:--------:|:--------------------:|:--------------------:|:--------------------:|:------------------:|
-| 0 (none)      | /24      | 255.255.255.0        | 1                    | 256                  | 254                |
-| 1             | /25      | 255.255.255.128      | 2                    | 128                  | 126                |
-| 2             | /26      | 255.255.255.192      | 4                    | 64                   | 62                 |
-| 3             | /27      | 255.255.255.224      | 8                    | 32                   | 30                 |
-| 4             | /28      | 255.255.255.240      | 16                   | 16                   | 14                 |
-| 5             | /29      | 255.255.255.248      | 32                   | 8                    | 6                  |
-| 6             | /30      | 255.255.255.252      | 64                   | 4                    | 2                  |
+### Mnemonic: "256 - Mask = Block Size"
+For quick subnet calculations:
+1. Look at the **last octet** (if the new subnet mask changes there).
+2. **Do**: 256 - (that octet) = block size.
+3. **List** your subnets in increments of that block size in the changed octet.
 
-> **Note**:  
-> - For typical IPv4 subnets, subtracting 2 from the total IPs yields the number of usable host IPs (because of the Network and Broadcast addresses).  
-> - `/31` and `/32` are special cases used typically for point-to-point links (/31) and loopback or single IP assignments (/32).
+For example, `255.255.255.192` → last octet `192` → `256 - 192 = 64`.  
+- So subnets are `.0`, `.64`, `.128`, `.192`.
 
----
+### Binary Quick Reference
+- **128 in binary** = `10000000`
+- **192 in binary** = `11000000`
+- **224 in binary** = `11100000`
+- **240 in binary** = `11110000`
+- **248 in binary** = `11111000`
+- **252 in binary** = `11111100`
+- **254 in binary** = `11111110`
+- **255 in binary** = `11111111`
 
-## Additional Tips
-1. **Remember the Binary**: It’s often helpful to visualize or write out the 8 bits of the last octet when subnetting a `/24`.  
-   - Example: For a `/25`, your last octet might be `1_______` in binary, showing you borrowed 1 bit.
+These are the **common subnet mask endings**. Memorizing them makes your job far easier.
 
-2. **Subnet Boundaries**: Each subnet range starts at multiples of the subnet block size in the last octet. For example, a `/26` block size is 64 in decimal (in the last octet).
-
-3. **Plan for Future Growth**: Always consider the potential need for more subnets or more hosts per subnet before choosing how many bits to borrow.
-
-4. **Network Design**: You may want to leave space for future networks (e.g., not all subnets must be used immediately, especially in a private addressing scenario like `192.168.x.x`).
+### Practice, Practice, Practice
+Nothing beats practicing real-world scenarios. Subnet in your home lab, do sample exam questions, or create hypothetical networks on paper. The more you do, the more it sticks.
 
 ---
 
 ## Conclusion
-- A single `/24` network provides 254 usable addresses and can be subdivided (“subnetted”) into smaller networks by borrowing bits from the host portion.
-- Each borrowed bit **doubles** the number of subnets and **halves** the number of available addresses per subnet.
-- Use the table above to quickly determine how many subnets you can create and how many hosts each will support.
+Subnetting is all about breaking down the 32-bit IPv4 space into **smaller chunks**. Once you grasp:
+1. **How many bits** to borrow,
+2. **How block size** (increments) work,
+3. **How many hosts** you can fit,
+
+…you can tackle **any** subnetting problem quickly. Keep the **block-size trick (256 - mask)** and the **binary patterns** in mind. Practice regularly, and soon **subnetting** will be second nature.
+
+
 
